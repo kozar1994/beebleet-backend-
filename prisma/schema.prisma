@@ -7,8 +7,150 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+/// ---------- Models for subscription billing and usage ----------
+
 model User {
-  id    Int     @id @default(autoincrement())
-  email String  @unique
-  name  String?
+  id                    String         @id @default(cuid())
+  email                 String         @unique
+  name                  String?
+  subscriptions         Subscription[] @relation("UserSubscriptions") // для історії
+  // нове поле — посилання на активну підписку (nullable)
+  activeSubscriptionId  String? @unique
+  activeSubscription    Subscription?  @relation("ActiveSubscription", fields: [activeSubscriptionId], references: [id])
+
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @updatedAt
+}
+
+
+model Plan {
+  id              Int            @id @default(autoincrement())
+  slug            String         @unique
+  name            String
+  pricePerMonth   Decimal        @db.Decimal(10, 2) //ціна за місяць в Decimal
+  qrLimit         Int // monthly quota for QR codes
+  description     String?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  subscriptions   Subscription[]
+  fromPlanChanges PlanChange[]   @relation("FromPlan")
+  toPlanChanges   PlanChange[]   @relation("ToPlan")
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELED
+  PAST_DUE
+  TRIAL
+}
+
+model Subscription {
+  id                  String               @id @default(cuid())
+  
+  user                User                 @relation("UserSubscriptions", fields: [userId], references: [id])
+  userId              String
+  plan                Plan                 @relation(fields: [planId], references: [id])
+  planId              Int
+  status              SubscriptionStatus   @default(ACTIVE)
+  startDate           DateTime // коли вперше була активована підписка (UTC)
+  currentPeriodStart  DateTime // початок поточного періоду (UTC)
+  currentPeriodEnd    DateTime // кінець поточного періоду (UTC)
+  quantity            Int                  @default(1)
+  autoRenew           Boolean              @default(true)
+
+  billingTransactions BillingTransaction[]
+  usageRecords        UsageRecord[]
+  planChanges         PlanChange[]
+  invoices            Invoice[]
+
+  // зворотня сторона для activeSubscription
+  activeFor           User?                @relation("ActiveSubscription")
+
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+
+  @@index([userId])
+  @@index([planId])
+}
+
+model UsageRecord {
+  id             String       @id @default(cuid())
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id])
+  subscriptionId String
+  // час всюди в UTC
+  date           DateTime
+  used           Int          @default(0)
+  createdAt      DateTime     @default(now())
+
+  @@unique([subscriptionId, date])
+  @@index([subscriptionId, date])
+}
+
+enum TransactionType {
+  CHARGE
+  CREDIT
+  REFUND
+  ADJUSTMENT
+}
+
+model BillingTransaction {
+  id             String          @id @default(cuid())
+  subscription   Subscription    @relation(fields: [subscriptionId], references: [id])
+  subscriptionId String
+
+  invoice        Invoice?        @relation(fields: [invoiceId], references: [id])
+  invoiceId      String?
+  planChange     PlanChange?     @relation("BillingTransactionToPlanChange", fields: [planChangeId], references: [id])
+  planChangeId   String?         @unique
+  type           TransactionType
+  amount         Decimal         @db.Decimal(10, 2)
+  currency       String          @default("USD")
+  description    String?
+  createdAt      DateTime        @default(now())
+
+  // TODO: або сюди зберігатиму лінки або потім добавлю в Invoice подумай
+
+  @@index([subscriptionId])
+  @@index([createdAt])
+}
+
+model Invoice {
+  id             String               @id @default(cuid())
+  subscription   Subscription         @relation(fields: [subscriptionId], references: [id])
+  subscriptionId String
+  total          Decimal              @db.Decimal(10, 2)
+  issuedAt       DateTime             @default(now())
+  dueDate        DateTime?
+  paid           Boolean              @default(false)
+  transactions   BillingTransaction[]
+
+  @@index([subscriptionId])
+}
+
+enum PlanChangeStatus {
+  PENDING
+  COMPLETED
+  REJECTED
+}
+
+model PlanChange {
+  id                 String              @id @default(cuid())
+  subscription       Subscription        @relation(fields: [subscriptionId], references: [id])
+  subscriptionId     String
+  fromPlan           Plan                @relation("FromPlan", fields: [fromPlanId], references: [id])
+  fromPlanId         Int
+  toPlan             Plan                @relation("ToPlan", fields: [toPlanId], references: [id])
+  toPlanId           Int
+  requestedAt        DateTime            @default(now())
+  effectiveAt        DateTime?
+  processedAt        DateTime?
+  status             PlanChangeStatus    @default(PENDING)
+  // пропорційна сума (додатне значення означає, що клієнт отримує кредит), але краще взагалі не позволяти план міняти на менший
+  prorationAmount    Decimal?            @db.Decimal(10, 2)
+  reason             String?
+  processedBy        String?
+  createdAt          DateTime            @default(now())
+  billingTransaction BillingTransaction? @relation("BillingTransactionToPlanChange")
+
+  @@index([subscriptionId])
 }
