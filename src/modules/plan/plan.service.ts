@@ -16,7 +16,7 @@ export class PlanService {
   }
 
   async update(
-    id: number,
+    id: string,
     updatePlanDto: UpdatePlanDto,
   ): Promise<PlanResponseDto> {
     const plan = await this.prisma.plan.update({
@@ -26,7 +26,7 @@ export class PlanService {
     return this.mapToDto(plan);
   }
 
-  async remove(id: number): Promise<PlanResponseDto> {
+  async remove(id: string): Promise<PlanResponseDto> {
     const plan = await this.prisma.plan.delete({
       where: { id },
     });

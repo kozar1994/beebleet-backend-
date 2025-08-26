@@ -24,7 +24,7 @@ model User {
 
 
 model Plan {
-  id              Int            @id @default(autoincrement())
+  id              String         @id @default(cuid())
   slug            String         @unique
   name            String
   pricePerMonth   Decimal        @db.Decimal(10, 2) //ціна за місяць в Decimal
@@ -50,7 +50,7 @@ model Subscription {
   user                User                 @relation("UserSubscriptions", fields: [userId], references: [id])
   userId              String
   plan                Plan                 @relation(fields: [planId], references: [id])
-  planId              Int
+  planId              String
   status              SubscriptionStatus   @default(ACTIVE)
   startDate           DateTime // коли вперше була активована підписка (UTC)
   currentPeriodStart  DateTime // початок поточного періоду (UTC)
@@ -138,9 +138,9 @@ model PlanChange {
   subscription       Subscription        @relation(fields: [subscriptionId], references: [id])
   subscriptionId     String
   fromPlan           Plan                @relation("FromPlan", fields: [fromPlanId], references: [id])
-  fromPlanId         Int
+  fromPlanId         String
   toPlan             Plan                @relation("ToPlan", fields: [toPlanId], references: [id])
-  toPlanId           Int
+  toPlanId           String
   requestedAt        DateTime            @default(now())
   effectiveAt        DateTime?
   processedAt        DateTime?

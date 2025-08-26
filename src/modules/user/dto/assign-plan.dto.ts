@@ -1,8 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsInt } from 'class-validator';
+import { IsString } from 'class-validator';
 
 export class AssignPlanDto {
-  @ApiProperty({ example: 1, description: 'ID of the plan to assign' })
-  @IsInt()
-  planId: number;
+  @ApiProperty({
+    example: 'clx123abc456def789ghi012',
+    description: 'ID of the plan to assign',
+  })
+  @IsString()
+  planId: string;
 }

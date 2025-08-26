@@ -1,8 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 export class PlanResponseDto {
-  @ApiProperty({ example: 1 })
-  id: number;
+  @ApiProperty({ example: 'clx123abc456def789ghi012' })
+  id: string;
 
   @ApiProperty({ example: 'pro-plan' })
   slug: string;

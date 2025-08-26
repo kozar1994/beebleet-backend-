@@ -35,7 +35,7 @@ export class PlanController {
   @ApiOperation({ summary: 'Update a plan by ID' })
   @ApiOkResponse({ type: PlanResponseDto })
   async update(
-    @Param('id', ParseIntPipe) id: number,
+    @Param('id', ParseIntPipe) id: string,
     @Body() updatePlanDto: UpdatePlanDto,
   ): Promise<PlanResponseDto> {
     return this.planService.update(id, updatePlanDto);
@@ -45,7 +45,7 @@ export class PlanController {
   @ApiOperation({ summary: 'Delete a plan by ID' })
   @ApiOkResponse({ type: PlanResponseDto })
   async remove(
-    @Param('id', ParseIntPipe) id: number,
+    @Param('id', ParseIntPipe) id: string,
   ): Promise<PlanResponseDto> {
     return this.planService.remove(id);
   }

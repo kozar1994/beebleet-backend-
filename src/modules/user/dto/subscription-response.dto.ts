@@ -4,8 +4,8 @@ export class SubscriptionResponseDto {
   @ApiProperty({ example: 'clx123abc456def789ghi012' })
   id: string;
 
-  @ApiProperty({ example: 1 })
-  planId: number;
+  @ApiProperty({ example: 'clx123abc456def789ghi013' })
+  planId: string;
 
   @ApiProperty({ example: 'ACTIVE' })
   status: string;
