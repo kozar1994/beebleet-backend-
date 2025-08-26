@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
 } from '@nestjs/common';
@@ -34,17 +35,19 @@ export class PlanController {
   @ApiOperation({ summary: 'Update a plan by ID' })
   @ApiOkResponse({ type: PlanResponseDto })
   async update(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Body() updatePlanDto: UpdatePlanDto,
   ): Promise<PlanResponseDto> {
-    return this.planService.update(parseInt(id), updatePlanDto);
+    return this.planService.update(id, updatePlanDto);
   }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a plan by ID' })
   @ApiOkResponse({ type: PlanResponseDto })
-  async remove(@Param('id') id: string): Promise<PlanResponseDto> {
-    return this.planService.remove(parseInt(id));
+  async remove(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<PlanResponseDto> {
+    return this.planService.remove(id);
   }
 
   @Get()
