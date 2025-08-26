@@ -9,6 +9,8 @@ import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserResponseDto } from './dto/user-response.dto';
+import { AssignPlanDto } from './dto/assign-plan.dto';
+import { SubscriptionResponseDto } from './dto/subscription-response.dto';
 
 @ApiTags('Users')
 @Controller('user')
@@ -37,5 +39,15 @@ export class UserController {
   @ApiOkResponse({ type: [UserResponseDto] })
   async findAll(): Promise<UserResponseDto[]> {
     return this.userService.findAll();
+  }
+
+  @Post(':id/assign-plan')
+  @ApiOperation({ summary: 'Assign a plan to a user' })
+  @ApiCreatedResponse({ type: SubscriptionResponseDto })
+  async assignPlan(
+    @Param('id') userId: string,
+    @Body() assignPlanDto: AssignPlanDto,
+  ): Promise<SubscriptionResponseDto> {
+    return this.userService.assignPlan(userId, assignPlanDto);
   }
 }
