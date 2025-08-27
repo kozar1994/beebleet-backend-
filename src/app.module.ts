@@ -8,9 +8,18 @@ import { InvoiceService } from './modules/invoice/invoice.service';
 import { InvoiceModule } from './modules/invoice/invoice.module';
 import { SubscriptionModule } from './modules/subscription/subscription.module';
 import { PaymentModule } from './modules/payment/payment.module';
+import { DayjsModule } from './libs/dayjs';
 
 @Module({
-  imports: [PrismaModule, UserModule, PlanModule, InvoiceModule, SubscriptionModule, PaymentModule],
+  imports: [
+    PrismaModule,
+    DayjsModule,
+    UserModule,
+    PlanModule,
+    InvoiceModule,
+    SubscriptionModule,
+    PaymentModule,
+  ],
   controllers: [AppController],
   providers: [AppService, InvoiceService],
 })

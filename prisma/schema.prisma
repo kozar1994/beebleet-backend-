@@ -7,8 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-/// ---------- Models for subscription billing and usage ----------
-
 model User {
   id                    String         @id @default(cuid())
   email                 String         @unique
@@ -42,6 +40,9 @@ enum SubscriptionStatus {
   CANCELED
   PAST_DUE
   TRIAL
+  // якись з цих двох статусів при першому ствроні статуст що пітписка є але не була оплачена ще
+  PENDING 
+  AWAITING_PAYMENT 
 }
 
 model Subscription {
@@ -51,7 +52,7 @@ model Subscription {
   userId              String
   plan                Plan                 @relation(fields: [planId], references: [id])
   planId              String
-  status              SubscriptionStatus   @default(ACTIVE)
+  status              SubscriptionStatus   @default(AWAITING_PAYMENT)
   startDate           DateTime // коли вперше була активована підписка (UTC)
   currentPeriodStart  DateTime // початок поточного періоду (UTC)
   currentPeriodEnd    DateTime // кінець поточного періоду (UTC)
@@ -116,15 +117,18 @@ model BillingTransaction {
 
 model Invoice {
   id             String               @id @default(cuid())
-  subscription   Subscription         @relation(fields: [subscriptionId], references: [id])
-  subscriptionId String
+  subscription   Subscription?         @relation(fields: [subscriptionId], references: [id])
+  subscriptionId String?
   total          Decimal              @db.Decimal(10, 2)
   issuedAt       DateTime             @default(now())
   dueDate        DateTime?
   paid           Boolean              @default(false)
+  stripeSessionId String?             @unique
+  stripePaymentId String?
   transactions   BillingTransaction[]
 
   @@index([subscriptionId])
+  @@index([stripeSessionId])
 }
 
 enum PlanChangeStatus {
