@@ -23,7 +23,7 @@
     "prisma:migrate:deploy": "prisma migrate deploy",
     "prisma:db:push": "prisma db push",
     "prisma:studio": "prisma studio --browser none",
-    "prisma:seed": "ts-node --transpile-only prisma/seed.ts",
+    "prisma:seed": "node dist/prisma/seed.js",
     "prisma:reset": "prisma migrate reset --force --skip-seed"
   },
   "dependencies": {

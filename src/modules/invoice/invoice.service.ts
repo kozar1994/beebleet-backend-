@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/libs/prisma/prisma.service';
+import { PrismaService } from '../../libs/prisma/prisma.service';
 import { CreateInvoiceDto } from './dto/create-invoice.dto';
 import { UpdateInvoiceDto } from './dto/update-invoice.dto';
 import { InvoiceResponseDto } from './dto/invoice-response.dto';
 import { PaymentService } from '../payment/payment.service';
-import { DayjsService } from 'src/libs/dayjs';
+import { DayjsService } from '../../libs/dayjs';
 import { Prisma } from '@prisma/client';
 
 @Injectable()
