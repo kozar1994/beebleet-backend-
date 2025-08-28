@@ -3,29 +3,32 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 async function main() {
-  // Create Basic Plan
-  await prisma.plan.create({
-    data: {
+  const plans = [
+    {
       slug: 'basic',
       name: 'Basic Plan',
       pricePerMonth: 10,
       qrLimit: 5,
       description: 'Basic subscription plan',
     },
-  });
-
-  // Create Pro Plan
-  await prisma.plan.create({
-    data: {
+    {
       slug: 'pro',
       name: 'Pro Plan',
       pricePerMonth: 25,
       qrLimit: 20,
       description: 'Professional subscription plan',
     },
-  });
+  ];
 
-  console.log('Seeded database with 2 plans');
+  for (const plan of plans) {
+    await prisma.plan.upsert({
+      where: { slug: plan.slug },
+      update: { ...plan },
+      create: { ...plan },
+    });
+  }
+
+  console.log(`Seeded database with ${plans.length} plans`);
 }
 
 main()
