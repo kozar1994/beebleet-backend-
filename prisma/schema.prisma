@@ -60,7 +60,6 @@ model Subscription {
   autoRenew           Boolean              @default(true)
 
   billingTransactions BillingTransaction[]
-  usageRecords        UsageRecord[]
   planChanges         PlanChange[]
   invoices            Invoice[]
 
@@ -72,19 +71,6 @@ model Subscription {
 
   @@index([userId])
   @@index([planId])
-}
-
-model UsageRecord {
-  id             String       @id @default(cuid())
-  subscription   Subscription @relation(fields: [subscriptionId], references: [id])
-  subscriptionId String
-  // час всюди в UTC
-  date           DateTime
-  used           Int          @default(0)
-  createdAt      DateTime     @default(now())
-
-  @@unique([subscriptionId, date])
-  @@index([subscriptionId, date])
 }
 
 enum TransactionType {
