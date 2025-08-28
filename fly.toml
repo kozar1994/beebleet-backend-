@@ -1,0 +1,43 @@
+# fly.toml file generated for beebleet-server
+
+app = "beebleet-server"
+primary_region = "ams" # Choose a region close to you or your users
+
+[build]
+  dockerfile = "Dockerfile"
+
+[deploy]
+  release_command = "pnpm run prisma:migrate:deploy && pnpm run prisma:seed"
+
+[[services]]
+  protocol = "tcp"
+  internal_port = 3000
+  processes = ["app"]
+
+  [[services.ports]]
+    port = 80
+    handlers = ["http"]
+    force_https = true
+
+  [[services.ports]]
+    port = 443
+    handlers = ["tls", "http"]
+
+  [services.concurrency]
+    type = "connections"
+    hard_limit = 25
+    soft_limit = 20
+
+  [[services.tcp_checks]]
+    interval = "15s"
+    timeout = "2s"
+    grace_period = "1s"
+
+  [[services.http_checks]]
+    interval = "15s"
+    timeout = "2s"
+    method = "get"
+    path = "/api" # Change to a valid health check endpoint if you have one
+    protocol = "http"
+    grace_period = "5s"
+    headers = {}
